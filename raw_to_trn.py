@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 
 # URL to scrape
-url = "https://racingaustralia.horse/FreeFields/Form.aspx?Key=2025Jan01%2CVIC%2CFlemington"
+url = "{url_required}"
 
 try:
     #Create date variables for folder paths
