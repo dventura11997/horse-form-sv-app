@@ -4,5 +4,5 @@ This horse racing form app is a personal folio project designed to demonstrate d
 
 # Technical diagram
 
-
+![alt text](https://github.com/dventura11997/horse-form-sv-app/blob/main/doco/tech_diagram.jpg?raw=true)
 
