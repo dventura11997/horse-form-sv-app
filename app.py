@@ -28,13 +28,13 @@ st.markdown(f"""
         Sab's Horse Racing Form App
     </div>
     <div class="homepage-text">
-        This is a front-end for you to download the form, if you have any feedback or questions you know where to reach me, happy punting ya big silly.
+        This is a front-end for you to download the form, simply copy in the URL, begin data transformation and output the csv to your downloads.
     </div>
 """, unsafe_allow_html=True)
 
 
 # Place the text input in the first column
-racing_url = st.text_input("Copy in the URL from Racing Australia:")
+racing_url = st.text_input("Copy in the URL:")
 
 track_condition_options = ['Good', 'Soft', 'Heavy', 'Soft/Heavy']
 track_conditions = st.selectbox('Track conditions for the day:', track_condition_options)
@@ -97,35 +97,3 @@ if st.button("Begin data transformation"):
    
     else:
         st.write("Please enter a valid URL.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-# st.markdown(f"""
-#     <div class="form-field-with-button">
-#         <input type="text" id="racing-url" placeholder="Copy in the URL from Racing Australia..." class="form-field">
-#         <button class="button">Download data</button>
-#     </div>
-
-#     <script>
-#         function getValue() {{
-#             var racingUrl = document.getElementById("racing-url").value;
-#             // Update the value in Streamlit session_state
-#             const racingUrlInput = window.parent.document.querySelector('input#racing-url');
-#             if (racingUrl) {{
-#                 // Streamlit's custom method to call a Python function (via session_state)
-#                 window.parent.streamlit.setSessionState('racing_url', racingUrl);
-#             }}
-#         }}
-#     </script>
-
-# """, unsafe_allow_html=True)
