@@ -7,7 +7,7 @@ import streamlit as st
 from pathlib import Path
 import functions
 
-st.set_page_config(page_title="Sabs horse form", layout="wide")
+st.set_page_config(page_title="Horse form app", layout="wide")
 
 # Path to the CSS file
 css_file_path = Path("styles.css")
@@ -25,10 +25,10 @@ st.markdown(f"""
     </head>
             
     <div class="major-heading">
-        Sab's Horse Racing Form App
+        Horse Racing Form App
     </div>
     <div class="homepage-text">
-        This is a front-end for you to download the form, simply copy in the URL, begin data transformation and output the csv to your downloads.
+        This is a front-end for you to download the form, simply copy in a valid URL from Racing Australia (needs to have form data published), begin data transformation and output the csv to your downloads.
     </div>
 """, unsafe_allow_html=True)
 
