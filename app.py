@@ -74,9 +74,12 @@ if st.button("Begin data transformation"):
             st.write(f"Trn rows: form: {trn_form_rows} field: {trn_field_rows}, meta: {trn_meta_rows}")
 
             int_output = functions.join_datasets(soup)
+            int_columns = int_output.columns
+            
             int_rows = len(int_output)
             if int_rows > 0:
                 st.write(f"Successfully joined tables, int rows: {int_rows}")
+                st.write(f"Columns from int output: {int_columns}")
 
             output_df = functions.drop_col(track_conditions, soup)
             #output_df = functions.conditional_col_deletes(track_conditions, soup)
