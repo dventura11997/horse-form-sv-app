@@ -81,7 +81,9 @@ if st.button("Begin data transformation"):
                 st.write(f"Successfully joined tables, int rows: {int_rows}")
                 st.write(f"Columns from int output: {int_columns}")
 
-            output_df = functions.up_ratio(soup)
+            up_ratio = functions.up_ratio(soup)
+            st.write(f"Up ratio created")
+            output_df = functions.conditional_col_deletes(track_conditions, soup)
             #output_df = functions.drop_col(track_conditions, soup)
             #output_df = functions.conditional_col_deletes(track_conditions, soup)
             
