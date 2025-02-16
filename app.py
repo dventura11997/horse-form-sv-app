@@ -81,7 +81,8 @@ if st.button("Begin data transformation"):
                 st.write(f"Successfully joined tables, int rows: {int_rows}")
                 st.write(f"Columns from int output: {int_columns}")
 
-            output_df = functions.drop_col(track_conditions, soup)
+            output_df = functions.up_ratio(soup)
+            #output_df = functions.drop_col(track_conditions, soup)
             #output_df = functions.conditional_col_deletes(track_conditions, soup)
             
             day, month, year, state, track = functions.create_file_name(racing_url)
