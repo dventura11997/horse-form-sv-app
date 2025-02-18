@@ -83,7 +83,7 @@ if st.button("Begin data transformation"):
 
             up_ratio = functions.up_ratio(soup)
             st.write(f"Up ratio created")
-            output_df = functions.conditional_col_deletes(track_conditions, soup)
+            output_df = functions.format(track_conditions, soup)
             #output_df = functions.drop_col(track_conditions, soup)
             #output_df = functions.conditional_col_deletes(track_conditions, soup)
             

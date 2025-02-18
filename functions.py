@@ -393,8 +393,7 @@ def conditional_col_deletes(track_conditions, soup):
 
         
         print("Conditionally deleted columns and calculated suitability based off of conditions")
-        #return print(df_mff)
-        return df_mff.to_csv(r'C:\Users\danie\Downloads\df_mff.csv', index=False) 
+        return df_mff
     
     except Exception as e:
         print(f"Error processing condtional columns: {e}")
@@ -426,5 +425,36 @@ def drop_col(track_conditions, soup):
         'Record_heavy_sum_places', 'Record_syn_sum_places', 'EventNumber', 'HorseNumber_y'], axis=1, inplace=True)
 
     return df_output
+
+def format(track_conditions, soup):
+    df_output = drop_col(track_conditions, soup)
+    try:
+        # Print unique race numbers
+        #print(df_output['RaceNumber'].unique())
+        unique_rn = df_output['RaceNumber'].unique()
+              
+        
+        # Create a new DataFrame to store the results
+        new_df = pd.DataFrame(columns=df_output.columns)
+        
+        # For each unique race number, add blank rows and then the data
+        for race_num in unique_rn:
+            # Add three blank rows
+            for _ in range(3):
+                new_df = pd.concat([new_df, pd.DataFrame([{col: '' for col in df_output.columns}])], ignore_index=True)
+            
+            # Add the rows for this race number
+            race_data = df_output[df_output['RaceNumber'] == race_num]
+            new_df = pd.concat([new_df, race_data], ignore_index=True)
+        
+        new_df_clean = new_df.drop([0, 1, 2])
+        
+        # Save the result
+        #new_df_clean.to_csv(r'C:\Users\danie\Downloads\df_mff.csv', index=False)
+        return new_df_clean
+        
+    except Exception as e:
+        print(f"Error formatting races: {e}")
+        return df_output
 
 
