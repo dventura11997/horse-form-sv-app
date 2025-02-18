@@ -306,6 +306,7 @@ def raw_to_trn_field(soup):
         df = raceday_field(soup)
         df['HorseWeight'] = df['HorseWeight'].str.replace('kg', '').astype(float)
         df['FirstSecondUp'] = df['LastTen'].apply(lambda value: first_second_up_handler(value, soup))
+        df['HorseJockeyClaim'] = df['HorseJockey'].str.extract(r'(\(.*?\))')
 
         df_field_trn = df
         return df_field_trn
