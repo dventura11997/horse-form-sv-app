@@ -36,7 +36,7 @@ st.markdown(f"""
 # Place the text input in the first column
 racing_url = st.text_input("Copy in the URL:")
 
-track_condition_options = ['Good', 'Soft', 'Heavy', 'Soft/Heavy']
+track_condition_options = ['good', 'soft', 'heavy']
 track_conditions = st.selectbox('Track conditions for the day:', track_condition_options)
 
 # Button to trigger the function once the URL is entered
@@ -79,7 +79,7 @@ if st.button("Begin data transformation"):
             int_rows = len(int_output)
             if int_rows > 0:
                 st.write(f"Successfully joined tables, int rows: {int_rows}")
-                st.write(f"Columns from int output: {int_columns}")
+                #st.write(f"Columns from int output: {int_columns}")
 
             up_ratio = functions.up_ratio(soup)
             st.write(f"Up ratio created")
