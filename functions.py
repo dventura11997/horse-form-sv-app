@@ -51,6 +51,7 @@ def get_request(racing_url):
     except Exception as e:
         print(f"Error parsing html: {e}")
     return soup
+    
 
 def raceday_meta(soup):
     try:
@@ -354,125 +355,46 @@ def up_ratio(soup):
     except Exception as e:
         print(f"Error creating Up Ratio: {e}")
 
-#Function to conditionally delete columns and create Suitability index
+
+
 def conditional_col_deletes(track_conditions, soup):
     track_conditions = get_track_conditions(track_conditions)
+    print(f"Track Conditions: {track_conditions} (Type: {type(track_conditions)})")
     try:
         df_mff = up_ratio(soup)
+        print(df_mff.columns)
+        print(df_mff.dtypes)
 
-        if track_conditions == 'Good':
-            # Drop unnecessary columns
-            df_mff.drop(
-                ['RecordFirm', 'RecordSoft', 'RecordHeavy', 'RecordSynthetic', 
-                 'Record_firm_place_rate', 'Record_soft_place_rate', 'Record_heavy_place_rate', 'Record_syn_place_rate'], 
-                axis=1, inplace=True
-            )
+        def calculate_suitability(row):
+            if row[f'Record_{track_conditions}_total'] == 0:
+                return round(row['UpRatio'] + 0.5, 2)
+            elif pd.isna(row['Record_dist_place_rate']) and pd.isna(row['Record_trk_place_rate']) and pd.isna(row['FirstSecondUp']):
+                return .5
+            else:
+                #Set denominators (determine inputs for suitability, first up/second up, track, distance, conditions, total)
+                first_up_denominator = pd.Series([row['Record_fup_total'], row['Record_trk_total'], row['Record_dist_total'], row[f'Record_{track_conditions}_total']]).replace(0, np.nan).sum()
+                second_up_denominator = pd.Series([row['Record_sup_total'], row['Record_trk_total'], row['Record_dist_total'], row[f'Record_{track_conditions}_total']]).replace(0, np.nan).sum()
+                general_denominator = pd.Series([row['Record_trk_total'], row['Record_dist_total'], row[f'Record_{track_conditions}_total']]).replace(0, np.nan).sum()
 
-            def calculate_suitability(row):
-                if row['Record_good_total'] == 0:
-                    return round(row['UpRatio'] + 0.5, 2)
-                else:
-                    return np.where(
-                        row['FirstSecondUp'] == 'First Up',
-                        (row['Record_fup_sum_places'] + row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_good_sum_places']) /
-                        (row['Record_fup_total'] + row['Record_trk_total'] + row['Record_dist_total'] + row['Record_good_total']).replace(0, np.nan),
-                        np.where(
-                            row['FirstSecondUp'] == 'Second Up',
-                            (row['Record_sup_sum_places'] + row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_good_sum_places']) /
-                            (row['Record_sup_total'] + row['Record_trk_total'] + row['Record_dist_total'] + row['Record_good_total']).replace(0, np.nan),
-                            (row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_good_sum_places']) /
-                            (row['Record_trk_total'] + row['Record_dist_total'] + row['Record_good_total']).replace(0, np.nan)
-                        )
+                return np.where(
+                    row['FirstSecondUp'] == 'First Up',
+                    (row['Record_fup_sum_places'] + row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row[f'Record_{track_conditions}_sum_places']) / first_up_denominator,
+                    np.where(
+                        row['FirstSecondUp'] == 'Second Up',
+                        (row['Record_sup_sum_places'] + row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row[f'Record_{track_conditions}_sum_places']) / second_up_denominator,
+                        (row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row[f'Record_{track_conditions}_sum_places']) / general_denominator
                     )
-                    # return round(row['UpRatio'] + (row['Record_good_sum_places'] / row['Record_good_total']), 2)
+                )
             
-            # Apply the helper function row-wise
-            df_mff['Suitability_index'] = df_mff.apply(calculate_suitability, axis=1)
+        # Apply the helper function row-wise
+        print("Checking for NaN values in df_mff before applying suitability calculation:")
+        print(df_mff.isna().sum())
+        df_mff['Suitability_index'] = df_mff.apply(calculate_suitability, axis=1)
 
-        elif track_conditions == 'Soft':
-            # Drop unnecessary columns
-            df_mff.drop(
-                ['RecordFirm', 'RecordGood', 'RecordHeavy', 'RecordSynthetic', 
-                 'Record_firm_place_rate', 'Record_good_place_rate', 'Record_heavy_place_rate', 'Record_syn_place_rate'], 
-                axis=1, inplace=True
-            )
-
-            def calculate_suitability(row):
-                if row['Record_soft_total'] == 0:
-                    return round(row['UpRatio'] + 0.5, 2)
-                else:
-                    return np.where(
-                        row['FirstSecondUp'] == 'First Up',
-                        (row['Record_fup_sum_places'] + row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_soft_sum_places']) /
-                        (row['Record_fup_total'] + row['Record_trk_total'] + row['Record_dist_total'] + row['Record_soft_total']).replace(0, np.nan),
-                        np.where(
-                            row['FirstSecondUp'] == 'Second Up',
-                            (row['Record_sup_sum_places'] + row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_soft_sum_places']) /
-                            (row['Record_sup_total'] + row['Record_trk_total'] + row['Record_dist_total'] + row['Record_soft_total']).replace(0, np.nan),
-                            (row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_soft_sum_places']) /
-                            (row['Record_trk_total'] + row['Record_dist_total'] + row['Record_soft_total']).replace(0, np.nan)
-                        )
-                    )
-                    # return round(row['UpRatio'] + (row['Record_good_sum_places'] / row['Record_good_total']), 2)
-            
-            # Apply the helper function row-wise
-            df_mff['Suitability_index'] = df_mff.apply(calculate_suitability, axis=1)
-
-        elif track_conditions == 'Heavy':
-            # Drop unnecessary columns
-            df_mff.drop(
-                ['RecordFirm', 'RecordSoft', 'RecordGood', 'RecordSynthetic', 
-                 'Record_firm_place_rate', 'Record_soft_place_rate', 'Record_good_place_rate', 'Record_syn_place_rate'], 
-                axis=1, inplace=True
-            )
-
-            def calculate_suitability(row):
-                if row['Record_heavy_total'] == 0:
-                    return round(row['UpRatio'] + 0.5, 2)
-                else:
-                    return np.where(
-                        row['FirstSecondUp'] == 'First Up',
-                        (row['Record_fup_sum_places'] + row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_heavy_sum_places']) /
-                        (row['Record_fup_total'] + row['Record_trk_total'] + row['Record_dist_total'] + row['Record_heavy_total']).replace(0, np.nan),
-                        np.where(
-                            row['FirstSecondUp'] == 'Second Up',
-                            (row['Record_sup_sum_places'] + row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_heavy_sum_places']) /
-                            (row['Record_sup_total'] + row['Record_trk_total'] + row['Record_dist_total'] + row['Record_heavy_total']).replace(0, np.nan),
-                            (row['Record_trk_sum_places'] + row['Record_dist_sum_places'] + row['Record_heavy_sum_places']) /
-                            (row['Record_trk_total'] + row['Record_dist_total'] + row['Record_heavy_total']).replace(0, np.nan)
-                        )
-                    )
-                    # return round(row['UpRatio'] + (row['Record_good_sum_places'] / row['Record_good_total']), 2)
-            
-            # Apply the helper function row-wise
-            df_mff['Suitability_index'] = df_mff.apply(calculate_suitability, axis=1)
-
-            # # Drop unnecessary columns
-            # df_mff.drop(
-            #     ['RecordFirm', 'RecordGood', 'RecordSynthetic', 
-            #      'Record_firm_place_rate', 'Record_good_place_rate', 'Record_syn_place_rate'], 
-            #     axis=1, inplace=True
-            # )
-
-            # def calculate_suitability(row):
-            #     if row['Record_soft_total'] == 0 and row['Record_heavy_total'] == 0:
-            #         return round(row['UpRatio'] + 0.5, 2)
-            #     elif row['Record_soft_total'] == 0 and row['Record_heavy_total'] != 0:
-            #         return round(row['UpRatio'] + row['Record_heavy_place_rate'], 2)
-            #     elif row['Record_soft_total'] != 0 and row['Record_heavy_total'] == 0:
-            #         return round(row['UpRatio'] + row['Record_soft_place_rate'], 2)
-            #     else:
-            #         return round(
-            #             row['UpRatio'] + 
-            #             ((row['Record_soft_sum_places'] + row['Record_heavy_sum_places']) / 
-            #                 (row['Record_soft_total'] + row['Record_heavy_total'])), 2
-            #         )
-
-            # # Apply the helper function row-wise
-            # df_mff['Suitability_index'] = df_mff.apply(calculate_suitability, axis=1)
         
         print("Conditionally deleted columns and calculated suitability based off of conditions")
-        return df_mff
+        #return print(df_mff)
+        return df_mff.to_csv(r'C:\Users\danie\Downloads\df_mff.csv', index=False) 
     
     except Exception as e:
         print(f"Error processing condtional columns: {e}")
